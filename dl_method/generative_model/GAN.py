@@ -71,35 +71,37 @@ class Discriminator(nn.Module):
         flat_img = img.view(-1, np.prod(IMG_SHAPE))
         validity = self.model(flat_img)
         return validity
-
-generator = Generator().to(DEVICE)
-discriminator = Discriminator().to(DEVICE)
-
-criterion = nn.BCELoss()
-optimizer_G = torch.optim.Adam(generator.parameters(), lr=LEARNING_RATE, betas=BETAS)
-optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=LEARNING_RATE, betas=BETAS)
-
-for epoch in range(1, EPOCHS+1):
-    with tqdm(data_loader, unit='batch') as t:
-        t.set_description(f'Epoch {epoch}')
-        for img, _ in t:
-            img = img.to(DEVICE)
-            
-            real = torch.ones(img.size(0), 1, device=DEVICE)
-            fake = torch.zeros(img.size(0), 1, device=DEVICE)            
-
-            optimizer_G.zero_grad()
-            z = torch.rand(img.size(0), LATENT_DIM, device=DEVICE)
-            gen_img = generator(z)
-            loss_G = criterion(discriminator(gen_img), real)
-            loss_G.backward()
-            optimizer_G.step()
-            
-            optimizer_D.zero_grad()
-            real_loss = criterion(discriminator(img), real)
-            fake_loss = criterion(discriminator(gen_img.detach()), fake)
-            loss_D = 0.5*(real_loss + fake_loss)
-            loss_D.backward()
-            optimizer_D.step()
-            
-            t.set_postfix(loss_D=f'{loss_D.item():.4f}', loss_G=f'{loss_G.item():.4f}')
+    
+    
+if __name__ == '__main__':
+    generator = Generator().to(DEVICE)
+    discriminator = Discriminator().to(DEVICE)
+    
+    criterion = nn.BCELoss()
+    optimizer_G = torch.optim.Adam(generator.parameters(), lr=LEARNING_RATE, betas=BETAS)
+    optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=LEARNING_RATE, betas=BETAS)
+    
+    for epoch in range(1, EPOCHS+1):
+        with tqdm(data_loader, unit='batch') as t:
+            t.set_description(f'Epoch {epoch}')
+            for img, _ in t:
+                img = img.to(DEVICE)
+                
+                real = torch.ones(img.size(0), 1, device=DEVICE)
+                fake = torch.zeros(img.size(0), 1, device=DEVICE)            
+    
+                optimizer_G.zero_grad()
+                z = torch.rand(img.size(0), LATENT_DIM, device=DEVICE)
+                gen_img = generator(z)
+                loss_G = criterion(discriminator(gen_img), real)
+                loss_G.backward()
+                optimizer_G.step()
+                
+                optimizer_D.zero_grad()
+                real_loss = criterion(discriminator(img), real)
+                fake_loss = criterion(discriminator(gen_img.detach()), fake)
+                loss_D = 0.5*(real_loss + fake_loss)
+                loss_D.backward()
+                optimizer_D.step()
+                
+                t.set_postfix(loss_D=f'{loss_D.item():.4f}', loss_G=f'{loss_G.item():.4f}')
