@@ -44,7 +44,8 @@ class VGG(nn.Module):
         
     def forward(self, x):
         return self.model(x)
-    
-model = VGG(model_config['16'])
-x = torch.rand(1, 3, 224, 224)
-assert model(x).shape == (1, 1000)
+
+if __name__ == '__main__':
+    model = VGG(model_config['16'])
+    x = torch.rand(1, 3, 224, 224)
+    assert model(x).shape == (1, 1000)
