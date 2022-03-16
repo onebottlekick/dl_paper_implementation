@@ -3,9 +3,9 @@ from torch import nn
 
 
 # assume that image_shape = (B, 3, 224, 224) = (B, C, H, W)
-class DCNN(nn.Module):
+class AlexNet(nn.Module):
     def __init__(self):
-        super(DCNN, self).__init__()
+        super(AlexNet, self).__init__()
         
         self.relu = nn.ReLU()
         self.max_pool = nn.MaxPool2d(2, 2)
@@ -36,6 +36,6 @@ class DCNN(nn.Module):
 
 
 if __name__ == '__main__':    
-    model = DCNN()
+    model = AlexNet()
     x = torch.rand(1, 3, 224, 224)
     assert model(x).shape == (1, 1000)
