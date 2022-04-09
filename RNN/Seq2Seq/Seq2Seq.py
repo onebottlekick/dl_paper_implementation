@@ -66,3 +66,23 @@ class Seq2Seq(nn.Module):
             x = target[t] if random.random() < teacher_force_ratio else best_guess
             
         return outputs
+    
+
+if __name__ == '__main__':
+    input_dim = 300
+    output_dim = 400
+    embedding_size = 256
+    hidden_size = 512
+    batch_size = 10
+    source_length = 15
+    target_length = 17
+
+    encoder = Encoder(input_dim, embedding_size, hidden_size, 2, 0.2)
+    decoder = Decoder(output_dim, embedding_size, hidden_size, output_dim, 2, 0.2)
+    seq2seq = Seq2Seq(encoder, decoder)
+    
+    source = torch.randint(input_dim, size=(source_length, batch_size))
+    target = torch.randint(output_dim, size=(target_length, batch_size))
+
+    y = seq2seq(source, target, output_dim)
+    assert y.shape == (target_length, batch_size, output_dim)
