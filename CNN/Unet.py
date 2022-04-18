@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torchvision.transforms as transforms
+from torchvision.transforms import functional as TF
 
 
 class DoubleConv(nn.Module):
@@ -8,10 +8,10 @@ class DoubleConv(nn.Module):
         super(DoubleConv, self).__init__()
         
         self.conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
@@ -55,9 +55,15 @@ class UNet(nn.Module):
             skip_connection = skip_connections[i//2]
             
             if x.shape != skip_connection.shape:
-                x = transforms.functional.resize(x, size=skip_connection.shape[2:])
+                skip_connection = TF.resize(skip_connection, size=x.shape[2:])
             
             concat_skip = torch.cat((skip_connection, x), dim=1)
             x = self.ups[i+1](concat_skip)
         
         return self.final_conv(x)
+    
+    
+if __name__ == '__main__':
+    x = torch.randn(1, 1, 572, 572)
+    model = UNet(1, 2)
+    assert model(x).shape == (1, 2, 388, 388)
