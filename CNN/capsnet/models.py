@@ -1,3 +1,4 @@
+from pyrsistent import s
 import torch
 import torch.nn as nn
 
@@ -50,3 +51,42 @@ class MarginLoss(nn.Module):
         loss = labels*nn.ReLU()(self.m_positive - v_norm) + self.lambda_*(1 - labels)*nn.ReLU()(v_norm - self.m_negative)
         
         return loss.sum(dim=-1).mean()
+    
+    
+class CapsuleNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        
+        self.conv1 = nn.Conv2d(1, 256, kernel_size=9, stride=1)
+        self.conv2 = nn.Conv2d(256, 32*8, kernel_size=9, stride=2)
+        
+        self.squashing = Squashing()
+        
+        self.digit_caps = Router(32*6*6, 10, 8, 16, 3)
+        
+        self.decoder = nn.Sequential(
+            nn.Linear(16*10, 512),
+            nn.ReLU(),
+            nn.Linear(512, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 28*28),
+            nn.Sigmoid()
+        )
+        
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        x = self.relu((self.conv1(x)))
+        x = self.conv2(x)
+        caps = x.view(x.shape[0], 8, 32*6*6).permute(0, 2, 1)
+        caps = self.squashing(caps)
+        caps = self.digit_caps(caps)
+        
+        with torch.no_grad():
+            pred = (caps**2).sum(dim=-1).argmax(-1)
+            mask = torch.eye(10, device=x.device)[pred]
+            
+        reconstructions = self.decoder((caps*mask[:, :, None]).view(x.shape[0], -1))
+        reconstructions = reconstructions.view(-1, 1, 28, 28)
+        
+        return caps, reconstructions, pred
