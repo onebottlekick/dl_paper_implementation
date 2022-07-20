@@ -2,6 +2,7 @@ def base_config():
     return {
         'img_channels': 3,
         'img_size': 224,
+        'num_classes': 1000,
         'patch_size': 16,
         'num_heads': 12,
         'num_layers': 12,
