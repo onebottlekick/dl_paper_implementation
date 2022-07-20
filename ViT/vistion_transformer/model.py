@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from configs import *
 from modules import *
 from utils import *
 
@@ -56,6 +57,8 @@ class ViT(nn.Module):
         
         
 if __name__ == '__main__':
-    img = torch.randn(1, 3, 224, 224).cuda()
-    vit = ViT(3, 224, 16, 12, 12, 3072, 0.1).cuda()
-    assert vit(img).shape == (1, 197, 768)
+    config = b16_config()
+    model = build_model(ViT, config).cuda()
+    
+    img = torch.randn((1, config['img_channels']) + pair(config['img_size'])).cuda()
+    assert model(img).shape == (1, 197, 768)
