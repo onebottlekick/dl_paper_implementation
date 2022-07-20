@@ -7,6 +7,7 @@ def base_config():
         'num_heads': 12,
         'num_layers': 12,
         'mlp_size': 3072,
+        'embed_dim':768,
         'dropout': 0.1,
     }
     
@@ -25,6 +26,7 @@ def l16_config():
         'num_heads':16,
         'num_layers': 24,
         'mlp_size':4096,
+        'embed_dim':1024
     })
     return config
     
@@ -36,10 +38,11 @@ def l32_config():
 def h14_config():
     config = base_config()
     config.update({
-        'img_size':384,
+        'img_size':392, # img_size 384 doeesn't work
         'patch_size':14,
         'num_heads':16,
         'num_layers': 32,
-        'mlp_size':5120
+        'mlp_size':5120,
+        'embed_dim':1280
     })
     return config

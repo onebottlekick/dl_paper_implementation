@@ -8,7 +8,7 @@ from utils import *
 
 
 class ViT(nn.Module):
-    def __init__(self, img_channels, img_size, num_classes, patch_size, num_heads, num_layers, mlp_size, dropout):
+    def __init__(self, img_channels, img_size, num_classes, patch_size, num_heads, num_layers, mlp_size, embed_dim, dropout):
         super().__init__()
         
         img_shape = (img_channels,) + pair(img_size)
@@ -18,7 +18,8 @@ class ViT(nn.Module):
         
         self.to_patch = nn.Conv2d(img_channels, token_dim, kernel_size=patch_size, stride=patch_size)
         self.flatten_patches = nn.Flatten(2)
-        self.linear_projection = nn.Linear(token_dim, token_dim)
+        self.linear_projection = nn.Linear(token_dim, embed_dim)
+        token_dim = embed_dim
         self.cls_token = nn.Parameter(torch.zeros(1, 1, token_dim))
         self.pos_embedding = nn.Parameter(torch.zeros(1, num_patches + 1, token_dim))
         self.transformer_encoder = TransformerEncoder(num_layers, token_dim, num_heads, mlp_size, dropout)
