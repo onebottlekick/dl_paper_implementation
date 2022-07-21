@@ -47,6 +47,19 @@ def h14_config():
     })
     return config
 
+def mnist_config():
+    return {
+        'img_channels': 1,
+        'img_size': 28,
+        'patch_size': 4,
+        'num_heads': 4,
+        'num_layers': 6,
+        'mlp_size': 1024,
+        'embed_dim': 64,
+        'num_classes': 10,
+        'dropout': 0.1
+    }
+
 
 config_dict = {
     'b16': b16_config(),

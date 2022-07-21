@@ -14,7 +14,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='b16', help='model a
 parser.add_argument('-e', '--epochs', default=100, type=int, help='number of epochs (default: 100)')
 parser.add_argument('-b', '--batch-size', default=64, type=int, metavar='N', help='mini-batch size (default: 64)')
 parser.add_argument('-o', '--optimizer', default='adam', type=str, metavar='OPT', help='optimizer (default: adam)')
-parser.add_argument('--lr', '--learning-rate', default=0.1, type=int, dest='lr')
+parser.add_argument('--lr', '--learning-rate', default=0.1, type=float, dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
 parser.add_argument('--weight-decay', default=1e-4, type=float, metavar='W', help='weight decay (default: 1e-4)', dest='weight_decay')
 parser.add_argument('-d', '--device', default='cuda', type=str, help='device to use (default: cuda)')
@@ -37,8 +37,8 @@ def main():
     train_loader = None
     val_loader = None
     
-    config = config_dict[args.arch]
-    model = build_model(ViT, config).to(device)
+    model_config = config_dict[args.arch]
+    model = build_model(ViT, model_config).to(device)
     optimizer = optimizer_dict[args.optimizer.lower()](model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()
     

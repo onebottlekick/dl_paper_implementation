@@ -78,12 +78,13 @@ class TransformerEncoderBlock(nn.Module):
         self.layer_norm2 = nn.LayerNorm(token_dim)
         
     def forward(self, x, mask=None):
-        _x = self.dropout(self.msa(self.layer_norm1(x), mask)[0])
+        _x, attention = self.msa(self.layer_norm1(x), mask)
+        _x = self.dropout(_x)
         x = x + _x
         _x = self.dropout(self.mlp(self.layer_norm2(x)))
         x = x + _x
         
-        return x
+        return x, attention
     
 
 class TransformerEncoder(nn.Module):
@@ -91,9 +92,11 @@ class TransformerEncoder(nn.Module):
         super().__init__()
         
         self.blocks = nn.ModuleList([TransformerEncoderBlock(token_dim, num_heads, mlp_size, dropout) for _ in range(num_layers)])
+        self.attentions = []
         
     def forward(self, x, mask=None):
         for block in self.blocks:
-            x = block(x, mask)
+            x, attention = block(x, mask)
+            self.attentions.append(attention)
         
-        return x
+        return x, self.attentions

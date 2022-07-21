@@ -20,8 +20,8 @@ class ViT(nn.Module):
         self.flatten_patches = nn.Flatten(2)
         self.linear_projection = nn.Linear(token_dim, embed_dim)
         token_dim = embed_dim
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, token_dim))
-        self.pos_embedding = nn.Parameter(torch.zeros(1, num_patches + 1, token_dim))
+        self.cls_token = nn.Parameter(torch.randn(1, 1, token_dim))
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, token_dim))
         self.transformer_encoder = TransformerEncoder(num_layers, token_dim, num_heads, mlp_size, dropout)
         self.mlp_head = nn.Sequential(
             nn.Linear(token_dim, mlp_size),
@@ -54,13 +54,16 @@ class ViT(nn.Module):
         
         # transformer encoder
         # (batch_size, num_patches + 1, token_dim)
-        x = self.transformer_encoder(x)
+        x, attentions = self.transformer_encoder(x)
+        
+        # take cls token out
+        x = x[:, 0, :]
         
         # mlp head
-        # (batch_size, num_patches + 1, token_dim)
+        # (batch_size, 1, num_classes)
         x = self.mlp_head(x)
         
-        return x[:, 0, :]
+        return x, attentions
         
         
 if __name__ == '__main__':
