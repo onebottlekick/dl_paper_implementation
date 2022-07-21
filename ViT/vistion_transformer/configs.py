@@ -46,3 +46,12 @@ def h14_config():
         'embed_dim':1280
     })
     return config
+
+
+config_dict = {
+    'b16': b16_config(),
+    'b32': b32_config(),
+    'l16': l16_config(),
+    'l32': l32_config(),
+    'h14': h14_config(),
+}

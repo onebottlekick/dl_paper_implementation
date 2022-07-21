@@ -60,7 +60,7 @@ class ViT(nn.Module):
         # (batch_size, num_patches + 1, token_dim)
         x = self.mlp_head(x)
         
-        return x
+        return x[:, 0, :]
         
         
 if __name__ == '__main__':
