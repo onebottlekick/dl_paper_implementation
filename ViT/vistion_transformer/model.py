@@ -62,7 +62,8 @@ class ViT(nn.Module):
         
 if __name__ == '__main__':
     config = b16_config()
-    model = build_model(ViT, config).cuda()
-    
+    model = build_model(ViT, config).cuda()    
     img = torch.randn((1, config['img_channels']) + pair(config['img_size'])).cuda()
-    assert model(img).shape == (1, 197, config['num_classes'])
+    
+    output, _ = model(img)
+    assert output.shape == (1, config['num_classes'])
