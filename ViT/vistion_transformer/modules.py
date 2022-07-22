@@ -92,11 +92,11 @@ class TransformerEncoder(nn.Module):
         super().__init__()
         
         self.blocks = nn.ModuleList([TransformerEncoderBlock(token_dim, num_heads, mlp_size, dropout) for _ in range(num_layers)])
-        self.attentions = []
         
     def forward(self, x, mask=None):
+        attentions = []
         for block in self.blocks:
             x, attention = block(x, mask)
-            self.attentions.append(attention)
+            attentions.append(attention)
         
-        return x, self.attentions
+        return x, attentions
