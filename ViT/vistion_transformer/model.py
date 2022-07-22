@@ -23,13 +23,7 @@ class ViT(nn.Module):
         self.cls_token = nn.Parameter(torch.randn(1, 1, token_dim))
         self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, token_dim))
         self.transformer_encoder = TransformerEncoder(num_layers, token_dim, num_heads, mlp_size, dropout)
-        self.mlp_head = nn.Sequential(
-            nn.Linear(token_dim, mlp_size),
-            nn.GELU(),
-            nn.Dropout(dropout),
-            nn.Linear(mlp_size, num_classes),
-            nn.Dropout(dropout)
-        )
+        self.mlp_head = nn.Linear(token_dim, num_classes)
         
     def forward(self, x, mask=None):
         # input x: (batch_size, img_channels, img_size, img_size)
