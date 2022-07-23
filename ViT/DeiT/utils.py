@@ -132,7 +132,7 @@ class Trainer:
 
                         with torch.set_grad_enabled(phase == 'train'):
                             cls_tokens, distil_tokens,_ = self.model(inputs)
-                            loss = self.criterion(cls_tokens, targets)
+                            loss = self.criterion(inputs, cls_tokens, distil_tokens, targets)
 
                             t.set_postfix(loss=f'{loss.item():.6f}')
 
