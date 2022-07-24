@@ -96,9 +96,10 @@ class WarmupCosineSchedule(LambdaLR):
 
 
 class Trainer:
-    def __init__(self, model, dataloader_dict, criterion, optimizer, scheduler, num_epochs, topk, device):
+    def __init__(self, model, dataloader_dict, criterion, optimizer, scheduler, num_epochs, topk, model_path, device):
         self.model = model.to(device)
         self.best_acc = 0.0
+        self.best_loss = float('inf')
         self.dataloader_dict = dataloader_dict
         self.criterion = criterion
         self.optimizer = optimizer
@@ -107,6 +108,7 @@ class Trainer:
         self.topk = topk
         self.device = device
         self.running_loss, self.running_acc = {}, {}
+        self.model_path = model_path
     
     # TODO calc topk acc
     def train(self):
@@ -130,6 +132,10 @@ class Trainer:
                         with torch.set_grad_enabled(phase == 'train'):
                             outputs, _ = self.model(inputs)
                             loss = self.criterion(outputs, targets)
+                            
+                            if loss.item() < self.best_loss and not self.model.training:
+                                torch.save(self.model.state_dict(), self.model_path)
+                                self.best_loss = loss.item()
 
                             t.set_postfix(loss=f'{loss.item():.6f}')
 

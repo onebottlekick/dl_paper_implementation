@@ -59,6 +59,19 @@ def mnist_config():
         'num_classes': 10,
         'dropout': 0.1
     }
+    
+def cifar10_config():
+    return {
+        'img_channels': 3,
+        'img_size': 32,
+        'patch_size': 8,
+        'num_heads': 8,
+        'num_layers': 16,
+        'mlp_size': 2048,
+        'embed_dim': 128,
+        'num_classes': 10,
+        'dropout': 0.1
+    }
 
 
 config_dict = {
