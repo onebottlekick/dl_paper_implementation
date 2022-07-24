@@ -1,4 +1,5 @@
 import os, sys
+from turtle import xcor
 sys.path.append('../')
 from PIL import Image
 
@@ -42,7 +43,6 @@ def plot_pos_emb_similarity(pos_emb, nrow=7, ncol=7):
     fig.colorbar(im, ax=axes, shrink=0.8, label='Cosine similarity')
     
 
-# FIXME : doesn't work well
 def plot_attention_map(img, model, img_size, device):
     if isinstance(img, Image.Image):
         transform = transforms.Compose([
@@ -50,24 +50,24 @@ def plot_attention_map(img, model, img_size, device):
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
-
+        
         x = transform(img)
     
     elif isinstance(img, np.ndarray):
-        x = torch.tensor(img)
-        img = transforms.ToPILImage()(img)
+        x = torch.tensor(img).to(torch.float)
         if x.ndim == 2:
             x = x.unsqueeze(0)
-        x = x.permute(2, 0, 1).to(torch.float)
+        x = x.permute(2, 0, 1)
         
     elif isinstance(img, torch.Tensor):
         x = img.to(torch.float)
-        img = transforms.ToPILImage()(img)
         if x.ndim == 2:
             x = x.unsqueeze(0)
         
     else:
         raise ValueError('img must be a PIL.Image, numpy.ndarray or torch.Tensor')
+    
+    # img = 255.0 - img
     
     model = model.to(device)
     
@@ -86,11 +86,11 @@ def plot_attention_map(img, model, img_size, device):
     for n in range(1, augmented_attentions.shape[0]):
         joint_attentions[n] = torch.matmul(augmented_attentions[n], joint_attentions[n-1])
         
-    v = joint_attentions[-1]
+    v = joint_attentions[0]
     grid_size = int(np.sqrt(augmented_attentions.shape[-1]))
     mask = v[0, 1:].reshape(grid_size, grid_size).detach().numpy()
-    mask = cv2.resize(mask/mask.max(), img.size)[..., np.newaxis]
-    result = (mask*img).astype('uint8')
+    mask = cv2.resize(mask/mask.max(), x.shape[1:])[..., np.newaxis]
+    result = (mask.transpose(2, 0, 1)*x.cpu().detach().numpy()).astype('uint8')
     
     fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 12))
     
@@ -100,7 +100,7 @@ def plot_attention_map(img, model, img_size, device):
     
     _ = ax1.imshow(img)
     _ = ax2.imshow(mask.squeeze())
-    _ = ax3.imshow(result)
+    _ = ax3.imshow(result.transpose(1, 2, 0))
     
     
 def plot_rgb_filters(filters, patch_size=4, nrow=4, ncol=7):
