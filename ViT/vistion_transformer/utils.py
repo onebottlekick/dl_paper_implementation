@@ -98,7 +98,7 @@ class WarmupCosineSchedule(LambdaLR):
 class Trainer:
     def __init__(self, model, dataloader_dict, criterion, optimizer, scheduler, num_epochs, topk, model_path, device):
         self.model = model.to(device)
-        self.best_acc = 0.0
+        # self.best_acc = 0.0
         self.best_loss = float('inf')
         self.dataloader_dict = dataloader_dict
         self.criterion = criterion
@@ -107,7 +107,7 @@ class Trainer:
         self.num_epochs = num_epochs
         self.topk = topk
         self.device = device
-        self.running_loss, self.running_acc = {}, {}
+        # self.running_loss, self.running_acc = {}, {}
         self.model_path = model_path
     
     # TODO calc topk acc
@@ -119,11 +119,12 @@ class Trainer:
                 else:
                     self.model.eval()
 
-                self.running_loss[phase], self.running_acc[phase] = 0.0, 0.0
-
+                # self.running_loss[phase], self.running_acc[phase] = 0.0, 0.0
+                
+                top1, top5 = 0.0, 0.0
                 with tqdm(self.dataloader_dict[phase], unit='Batch') as t:
                     t.set_description(f'{phase} Epoch: {epoch+1}')
-                    for inputs, targets in t:
+                    for idx, (inputs, targets) in enumerate(t):
                         inputs = inputs.to(self.device)
                         targets = targets.to(self.device)
 
@@ -133,11 +134,15 @@ class Trainer:
                             outputs, _ = self.model(inputs)
                             loss = self.criterion(outputs, targets)
                             
+                            _top1, _top5 = accuracy(outputs, targets, topk=(1, 5))
+                            top1 += _top1.item()
+                            top5 += _top5.item()
+                            
                             if loss.item() < self.best_loss and not self.model.training:
                                 torch.save(self.model.state_dict(), self.model_path)
                                 self.best_loss = loss.item()
 
-                            t.set_postfix(loss=f'{loss.item():.6f}')
+                            t.set_postfix(loss=f'{loss.item():.6f}', top1=f'{top1/(idx+1):.2f}%', top5=f'{top5/(idx+1):.2f}%')
 
                             if phase == 'train':
                                 loss.backward()
