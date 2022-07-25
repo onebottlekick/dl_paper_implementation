@@ -1,5 +1,4 @@
 import os, sys
-from turtle import xcor
 sys.path.append('../')
 from PIL import Image
 
@@ -9,8 +8,6 @@ import numpy as np
 import torch
 from torchsummaryX import summary
 from torchvision import transforms
-from einops import reduce
-from sklearn.metrics.pairwise import cosine_similarity
 
 from utils import build_model
 
@@ -116,7 +113,7 @@ def model_summary(model, num_channels=1, img_size=28, device='cuda'):
     summary(model.to(device), x)
     
 
-def load_model(model, model_path, model_config, device='cuda'):
+def load_model(model, model_path, model_config):
     model = build_model(model, model_config)
     model.load_state_dict(torch.load(model_path))    
     model.eval()
