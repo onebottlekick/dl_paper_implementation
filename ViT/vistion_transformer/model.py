@@ -16,7 +16,8 @@ class ViT(nn.Module):
         patch_size = img_size//int(np.sqrt(num_patches))
         token_dim = img_channels*patch_size**2
         
-        self.to_patch = nn.Conv2d(img_channels, token_dim, kernel_size=patch_size, stride=patch_size)
+        # self.to_patch = nn.Conv2d(img_channels, token_dim, kernel_size=patch_size, stride=patch_size)
+        self.to_patch = nn.Unfold(kernel_size=patch_size, stride=patch_size)
         self.flatten_patches = nn.Flatten(2)
         self.linear_projection = nn.Linear(token_dim, embed_dim)
         token_dim = embed_dim
@@ -32,7 +33,8 @@ class ViT(nn.Module):
         # (batch_size, token_dim, sqrt(num_patches), sqrt(num_patches))
         x = self.to_patch(x)
         # (batch_size, token_dim, sqrt(num_patches), sqrt(num_patches)) -> (batch_size, token_dim, num_patches) -> (batch_size, num_patches, token_dim)
-        x = self.flatten_patches(x).transpose(1, 2)
+        # x = self.flatten_patches(x).transpose(1, 2)
+        x = x.transpose(1, 2)
         
         # linear projection of flattend patches
         # (batch_size, num_patches, token_dim)

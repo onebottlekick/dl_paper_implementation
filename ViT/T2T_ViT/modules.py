@@ -2,6 +2,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from utils import get_patch_shape
+
 
 class MSA(nn.Module):
     def __init__(self, token_dim, num_heads, dropout):
@@ -105,7 +107,8 @@ class SS(nn.Module):
         
         return x
     
-    
+
+# TODO make reshape module
 class Reshape:
     def __init__(self, batch_size, num_channels, height, width):
         self.batch_size = batch_size
@@ -120,8 +123,9 @@ class Reshape:
     
     
 class T2T_Module(nn.Module):
-    def __init__(self, img_channels, mlp_size, dropout=0.1, kernel_sizes=[7, 3, 3], strides=[4, 2, 2], paddings=[2, 1, 1]):
+    def __init__(self, img_channels, img_size, mlp_size, dropout=0.1, kernel_sizes=[7, 3, 3], strides=[4, 2, 2], paddings=[2, 1, 1]):
         super().__init__()
+        self.patch_shape = get_patch_shape(img_size, kernel_sizes, strides, paddings)
         
         self.init_soft_split = SS(kernel_sizes[0], strides[0], paddings[0])
         
@@ -132,8 +136,6 @@ class T2T_Module(nn.Module):
         self.soft_split2 = SS(kernel_sizes[2], strides[2], paddings[2])
         token_dim = token_dim*kernel_sizes[1]**2
         self.transformer2 = TransformerEncoderBlock(token_dim, 1, mlp_size//4, dropout)
-        
-        self.out_shape = None
         
     def forward(self, x):
         x = self.init_soft_split(x).transpose(1, 2)
@@ -149,7 +151,6 @@ class T2T_Module(nn.Module):
         x = x.transpose(1, 2).reshape(batch_size, token_dim, int(np.sqrt(num_patches)), int(np.sqrt(num_patches)))
         
         x = self.soft_split2(x).transpose(1, 2)
-        self.out_shape = x.shape
         
         return x
               
