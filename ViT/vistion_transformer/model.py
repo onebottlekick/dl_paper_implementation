@@ -21,10 +21,20 @@ class ViT(nn.Module):
         self.flatten_patches = nn.Flatten(2)
         self.linear_projection = nn.Linear(token_dim, embed_dim)
         token_dim = embed_dim
-        self.cls_token = nn.Parameter(torch.randn(1, 1, token_dim))
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, token_dim))
         self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, token_dim))
         self.transformer_encoder = TransformerEncoder(num_layers, token_dim, num_heads, mlp_size, dropout)
         self.mlp_head = nn.Linear(token_dim, num_classes)
+        
+        self.apply(self._init_weights)
+        
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            nn.init.xavier_uniform_(m.weight)
+            if hasattr(m, 'bias') and m.bias is not None:
+                nn.init.normal_(m.bias, std=1e-6)
+        nn.init.normal_(self.pos_embedding, std=0.02)
+        nn.init.constant_(self.cls_token, 0)
         
     def forward(self, x, mask=None):
         # input x: (batch_size, img_channels, img_size, img_size)
