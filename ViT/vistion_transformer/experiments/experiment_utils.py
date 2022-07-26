@@ -100,11 +100,11 @@ def plot_attention_map(img, model, img_size, device):
     _ = ax3.imshow(result.transpose(1, 2, 0))
     
     
-def plot_rgb_filters(filters, patch_size=4, nrow=4, ncol=7):
+def plot_rgb_filters(filters, img_channels, patch_size=4, nrow=4, ncol=7):
     total_len = nrow*ncol
     for i in range(total_len):
         plt.subplot(nrow, ncol, i%total_len + 1)
-        plt.imshow(filters[i].view(patch_size, patch_size).cpu().detach().numpy())
+        plt.imshow(filters[i].view(img_channels, patch_size, patch_size).permute(1, 2, 0).cpu().detach().numpy())
         plt.axis('off')
 
 

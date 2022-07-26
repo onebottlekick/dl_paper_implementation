@@ -19,7 +19,7 @@ parser.add_argument('--weight-decay', default=1e-4, type=float, metavar='W', hel
 parser.add_argument('-d', '--device', default='cuda', type=str, help='device to use (default: cuda)')
 parser.add_argument('-s', '--scheduler', default='warmup_cosine', type=str, help='scheduler (default: warmup_cosine)')
 parser.add_argument('-t', '--topk', default=(1, ), type=tuple, help='topk acc (default: (1, ))')
-parser.add_argument('--model-path', default='./experiments/model.pth', type=str, help='path to model')
+parser.add_argument('--model-path', default='./experiments/pretrained/model.pth', type=str, help='path to model')
 
 best_acc1 = 0
 
