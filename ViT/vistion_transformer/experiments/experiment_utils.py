@@ -72,6 +72,7 @@ def plot_attention_map(img, model, img_size, device):
     attentions = torch.stack(attentions).squeeze(1)
     attentions = attentions.cpu().detach()
     attentions = torch.mean(attentions, dim=1)
+    attentions = torch.mean(attentions, dim=0).unsqueeze(0)
     
     residual_attentions = torch.eye(attentions.shape[1])
     augmented_attentions = attentions + residual_attentions
@@ -83,7 +84,7 @@ def plot_attention_map(img, model, img_size, device):
     for n in range(1, augmented_attentions.shape[0]):
         joint_attentions[n] = torch.matmul(augmented_attentions[n], joint_attentions[n-1])
         
-    v = joint_attentions[0]
+    v = joint_attentions[-1]
     grid_size = int(np.sqrt(augmented_attentions.shape[-1]))
     mask = v[0, 1:].reshape(grid_size, grid_size).detach().numpy()
     mask = cv2.resize(mask/mask.max(), x.shape[1:])[..., np.newaxis]
