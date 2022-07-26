@@ -129,13 +129,15 @@ class T2T_Module(nn.Module):
         
         self.init_soft_split = SS(kernel_sizes[0], strides[0], paddings[0])
         
-        self.soft_split1 = SS(kernel_sizes[1], strides[1], paddings[1])
         token_dim = img_channels*kernel_sizes[0]**2
         self.transformer1 = TransformerEncoderBlock(token_dim, 1, mlp_size//4, dropout)
         
-        self.soft_split2 = SS(kernel_sizes[2], strides[2], paddings[2])
+        self.soft_split1 = SS(kernel_sizes[1], strides[1], paddings[1])
+        
         token_dim = token_dim*kernel_sizes[1]**2
         self.transformer2 = TransformerEncoderBlock(token_dim, 1, mlp_size//4, dropout)
+        
+        self.soft_split2 = SS(kernel_sizes[2], strides[2], paddings[2])
         
     def forward(self, x):
         x = self.init_soft_split(x).transpose(1, 2)
