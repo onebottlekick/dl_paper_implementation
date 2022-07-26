@@ -13,6 +13,8 @@ def base_config():
         'paddings': [2, 1, 1]
     }
 
+
+# TODO  -kernel_sizes, strides, paddings
 def mnist_config():
     return {
         'img_channels': 1,

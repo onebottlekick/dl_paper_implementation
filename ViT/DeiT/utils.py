@@ -11,8 +11,8 @@ def build_model(model, config):
     return model
 
 
-def build_model(model, config):
-    model = model(**config)
+def build_teacher_model(model, num_classes=1000):
+    model = model(num_classes)
     return model
 
 
@@ -96,10 +96,12 @@ class WarmupCosineSchedule(LambdaLR):
         return max(0.0, 0.5 * (1. + math.cos(math.pi * float(self.cycles) * 2.0 * progress)))
 
 
+# TODO remove hardcoded topk
 class Trainer:
-    def __init__(self, model, dataloader_dict, criterion, optimizer, scheduler, num_epochs, topk, device):
+    def __init__(self, model, dataloader_dict, criterion, optimizer, scheduler, num_epochs, topk, model_path, device, teacher_model=None, monitor='loss', distillation=False, distil_token_type='cls+distil'):
         self.model = model.to(device)
         self.best_acc = 0.0
+        self.best_loss = float('inf')
         self.dataloader_dict = dataloader_dict
         self.criterion = criterion
         self.optimizer = optimizer
@@ -108,9 +110,13 @@ class Trainer:
         self.topk = topk
         self.device = device
         self.running_loss, self.running_acc = {}, {}
+        self.teacher_model = teacher_model
+        self.monitor = monitor
+        self.model_path = model_path
+        self.distillation = distillation
+        self.distil_token_type = distil_token_type
     
     # TODO 
-    # - calc topk acc
     # - distillation
     def train(self):
         for epoch in range(self.num_epochs):
@@ -120,28 +126,65 @@ class Trainer:
                 else:
                     self.model.eval()
 
-                self.running_loss[phase], self.running_acc[phase] = 0.0, 0.0
-
+                top1, top5 = 0.0, 0.0
+                total_loss = 0.0
                 with tqdm(self.dataloader_dict[phase], unit='Batch') as t:
                     t.set_description(f'{phase} Epoch: {epoch+1}')
-                    for inputs, targets in t:
+                    for idx, (inputs, targets) in enumerate(t):
                         inputs = inputs.to(self.device)
                         targets = targets.to(self.device)
 
                         self.optimizer.zero_grad()
 
                         with torch.set_grad_enabled(phase == 'train'):
-                            cls_tokens, distil_tokens,_ = self.model(inputs)
-                            loss = self.criterion(inputs, cls_tokens, distil_tokens, targets)
+                            if self.distillation:
+                                cls_tokens, distil_tokens,_ = self.model(inputs)
+                                
+                                if self.distil_token_type == 'cls+distil':
+                                    _loss = self.criterion(inputs, cls_tokens, distil_tokens, targets)
+                                elif self.distil_token_type == 'distil':
+                                    _loss = self.criterion(inputs, distil_tokens, distil_tokens, targets)
+                                elif self.distil_token_type == 'cls':
+                                    _loss = self.criterion(inputs, cls_tokens, cls_tokens, targets)
+                                else:
+                                    raise ValueError(f'Unknown distil token type: {self.distil_token_type}, use ["cls", "distil", "cls+distil"]')
+                                
+                                total_loss += _loss.item()
+                                loss = total_loss/(idx+1)/cls_tokens.shape[0]
+                                _top1, _top5 = accuracy(cls_tokens, targets, topk=(1, 5))
+                                top1 += _top1.item()
+                                top5 += _top5.item()
+                                
+                            else:
+                                outputs = self.model(inputs)
+                                _loss = self.criterion(outputs, targets)
+                                total_loss += _loss.item()
+                                loss = total_loss/(idx+1)/outputs.shape[0]
+                                _top1, _top5 = accuracy(outputs, targets, topk=(1, 5))
+                                top1 += _top1.item()
+                                top5 += _top5.item()
+                                
+                                
 
-                            t.set_postfix(loss=f'{loss.item():.6f}')
+                            t.set_postfix(loss=f'{loss:.6f}', top1=f'{top1/(idx+1):.2f}%', top5=f'{top5/(idx+1):.2f}%')
 
                             if phase == 'train':
-                                loss.backward()
+                                _loss.backward()
                                 self.optimizer.step()
+                                
+                    if self.monitor == 'loss':
+                        if loss < self.best_loss and not self.model.training:
+                            torch.save(self.model.state_dict(), self.model_path)
+                            self.best_loss = loss
+                    
+                    elif self.monitor == 'acc':
+                        if top1/(idx+1) > self.best_acc and not self.model.training:
+                            torch.save(self.model.state_dict(), self.model_path)
+                            self.best_acc = top1/(idx+1)
 
                     if phase == 'train':
-                        self.scheduler.step()
+                        if self.scheduler is not None:
+                            self.scheduler.step()
                     else:
                         print()
                         print()
