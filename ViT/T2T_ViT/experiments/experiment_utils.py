@@ -40,64 +40,83 @@ def plot_pos_emb_similarity(pos_emb, nrow=7, ncol=7):
     fig.colorbar(im, ax=axes, shrink=0.8, label='Cosine similarity')
     
 
-def plot_attention_map(img, model, img_size, device):
+def plot_attention_map(img, model, img_size, device='cuda', img_channels=3):
     if isinstance(img, Image.Image):
         transform = transforms.Compose([
             transforms.Resize((img_size, img_size)),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+            transforms.Normalize([0.5 for _ in range(img_channels)], [0.5 for _ in range(img_channels)])
         ])
-        
         x = transform(img)
-    
+
     elif isinstance(img, np.ndarray):
-        x = torch.tensor(img).to(torch.float)
-        if x.ndim == 2:
-            x = x.unsqueeze(0)
-        x = x.permute(2, 0, 1)
-        
+        if img.ndim == 2:
+            img = img[..., np.newaxis]
+        img = img.transpose(2, 0, 1)
+        img = transforms.Compose([
+            transforms.Resize((img_size, img_size)),
+            transforms.ToPILImage()
+        ])(torch.from_numpy(img))
+        x = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize([0.5 for _ in range(img_channels)], [0.5 for _ in range(img_channels)])
+        ])(img)
+
     elif isinstance(img, torch.Tensor):
-        x = img.to(torch.float)
-        if x.ndim == 2:
-            x = x.unsqueeze(0)
-        
+        if img.ndim == 2:
+            img = img.unsqueeze(0)
+        img = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((img_size, img_size)),
+        ])(img)
+        # img = transforms.ToPILImage()(img)
+        x = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize([0.5 for _ in range(img_channels)], [0.5 for _ in range(img_channels)])
+        ])(img)
+
     else:
         raise ValueError('img must be a PIL.Image, numpy.ndarray or torch.Tensor')
-    
-    # img = 255.0 - img
-    
+
+
     model = model.to(device)
-    
+
     _, attentions = model(x.unsqueeze(0).to(device))
     attentions = torch.stack(attentions).squeeze(1)
     attentions = attentions.cpu().detach()
     attentions = torch.mean(attentions, dim=1)
-    
+    attentions = torch.mean(attentions, dim=0).unsqueeze(0)
+
     residual_attentions = torch.eye(attentions.shape[1])
     augmented_attentions = attentions + residual_attentions
     augmented_attentions = augmented_attentions/augmented_attentions.sum(dim=-1).unsqueeze(-1)
-    
+
     joint_attentions = torch.zeros(augmented_attentions.shape)
     joint_attentions[0] = augmented_attentions[0]
-    
+
     for n in range(1, augmented_attentions.shape[0]):
         joint_attentions[n] = torch.matmul(augmented_attentions[n], joint_attentions[n-1])
-        
-    v = joint_attentions[0]
+
+    v = joint_attentions[-1]
     grid_size = int(np.sqrt(augmented_attentions.shape[-1]))
     mask = v[0, 1:].reshape(grid_size, grid_size).detach().numpy()
-    mask = cv2.resize(mask/mask.max(), x.shape[1:])[..., np.newaxis]
-    result = (mask.transpose(2, 0, 1)*x.cpu().detach().numpy()).astype('uint8')
-    
+    mask = cv2.resize(mask/mask.max(), img.size)[..., np.newaxis]
+    if img.mode == 'L':
+        mask = mask.reshape(*img.size)
+    result = (mask*img).astype('uint8')
+
     fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 12))
-    
+
     ax1.set_title('Image')
     ax2.set_title('Attention Mask')
     ax3.set_title('Attention Map')
-    
+
     _ = ax1.imshow(img)
+    ax1.axis('off')
     _ = ax2.imshow(mask.squeeze())
-    _ = ax3.imshow(result.transpose(1, 2, 0))
+    ax2.axis('off')
+    _ = ax3.imshow(result)
+    ax3.axis('off')
     
     
 def plot_rgb_filters(filters, img_channels, nrow=4, ncol=7):
