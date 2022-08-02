@@ -2,8 +2,8 @@
 
 ## Image Classification
 * Very Deep Convolutional Networks for Large-Scale Image Recognition [[pdf]](https://arxiv.org/pdf/1409.1556.pdf) [[code]](./Image_Classification/VGG.py)
-* Deep Residual Learning for Image Recognition [[pdf]](https://arxiv.org/pdf/1512.03385.pdf) [[code]](./CNN/ResNet.py)
-* Going Deeper with Convolutions [[pdf]](https://arxiv.org/pdf/1409.4842.pdf) [[code]](./CNN/GoogLeNet.py)
+* Deep Residual Learning for Image Recognition [[pdf]](https://arxiv.org/pdf/1512.03385.pdf) [[code]](./Image_Classification/ResNet.py)
+* Going Deeper with Convolutions [[pdf]](https://arxiv.org/pdf/1409.4842.pdf) [[code]](./Image_Classification/GoogLeNet.py)
 * ImageNet Classification with Deep Convolutional Neural Networks [[pdf]](https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf) [[code]](./Image_Classification/AlexNet.py)
 * Dynamic Routing Between Capsules [[pdf]](https://arxiv.org/pdf/1710.09829.pdf) [[code]](./Image_Classification/capsnet)
 * Exploring Randomly Wired Neural Networks for Image Recognition [[pdf]](https://arxiv.org/pdf/1904.01569.pdf) [[code]](./Image_Classification/RandWireNet)
