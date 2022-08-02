@@ -13,6 +13,7 @@
 
 ## Generative Models
 * Generative Adversarial Networks [[pdf]](https://arxiv.org/pdf/1406.2661.pdf) [[code]](./Generative_Models/GAN.py)
+* Image-to-Image Translation with Conditional Adversarial Networks [[pdf]](https://arxiv.org/pdf/1611.07004.pdf) [[code]](./Generative_Models/pix2pix.py)
 * Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks [[pdf]](https://arxiv.org/pdf/1511.06434.pdf) [[code]](./Generative_Models/DCGAN.py)
 * ViTGAN: Training GANs with Vision Transformers [[pdf]](https://arxiv.org/pdf/2107.04589.pdf)
 
