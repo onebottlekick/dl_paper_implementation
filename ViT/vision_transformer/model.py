@@ -18,7 +18,7 @@ class ViT(nn.Module):
         
         # self.to_patch = nn.Conv2d(img_channels, token_dim, kernel_size=patch_size, stride=patch_size)
         self.to_patch = nn.Unfold(kernel_size=patch_size, stride=patch_size)
-        self.flatten_patches = nn.Flatten(2)
+        # self.flatten_patches = nn.Flatten(2)
         self.linear_projection = nn.Linear(token_dim, embed_dim)
         token_dim = embed_dim
         self.cls_token = nn.Parameter(torch.zeros(1, 1, token_dim))
