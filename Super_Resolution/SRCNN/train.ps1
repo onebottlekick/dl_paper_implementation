@@ -1,0 +1,15 @@
+python main.py --save_dir ./train/SRCNN `
+               --reset True `
+               --log_file_name train.log `
+               --num_gpu 1 `
+               --train_dataset_dir ${train_dataset_dir} `
+               --test_dataset_dir ${test_dataset_dir} `
+               --img_channels 3 `
+               --num_filters 64 32 `
+               --filter_size 9 1 5 `
+               --learning_rate 1e-4 `
+               --batch_size 64 `
+               --num_epochs 100 `
+               --print_every 1 `
+               --save_every 10 `
+               --val_every 10
