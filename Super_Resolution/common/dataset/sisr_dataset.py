@@ -1,93 +1,40 @@
-import glob
 import os
 from PIL import Image
-import warnings
-warnings.filterwarnings("ignore")
 
-import numpy as np
-import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-from imageio import imread
 
 
-class ToTensor:
-    def __call__(self, sample):
-        HR = sample['HR']        
-        HR = HR.transpose((2,0,1))
-        LR = sample['LR']
-        LR = LR.transpose((2,0,1))
-        LR_sr = sample['LR_sr']
-        LR_sr = LR_sr.transpose((2,0,1))
+class SISR_Dataset(Dataset):
+    def __init__(self, args, path):
+        self.args = args
         
-        tensor = {'LR': torch.from_numpy(LR).float(),
-                  'HR': torch.from_numpy(HR).float(),
-                  'LR_sr': torch.from_numpy(LR_sr).float()}
- 
-        return tensor
-
-
-class TrainSet(Dataset):
-    def __init__(self, args, transform=transforms.Compose([ToTensor()])):
-        self.input_list = sorted([os.path.join(args.train_dataset_dir, name) for name in os.listdir(args.train_dataset_dir)])
-        self.transform = transform
-
+        self.input_list = sorted([os.path.join(path, name) for name in os.listdir(path)])
+        
+        self.hr_transform = transforms.Compose([
+            transforms.RandomCrop(args.img_size),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5 for _ in range(args.img_channels)], std=[0.5 for _ in range(args.img_channels)])
+        ])
+        
+        self.lr_transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((args.img_size[0]//args.lr_scale, args.img_size[1]//args.lr_scale), interpolation=transforms.InterpolationMode.BICUBIC),
+            transforms.ToTensor()
+        ])
+        
     def __len__(self):
         return len(self.input_list)
-
+    
     def __getitem__(self, idx):
-        HR = imread(self.input_list[idx])
-        HR = HR.astype(np.float32)
-        HR = HR / 127.5 - 1.
-        h,w = HR.shape[:2]
-
-        LR = np.array(Image.fromarray(np.uint8(HR)).resize((w//4, h//4), Image.BICUBIC))
-        LR = LR.astype(np.float32)
-        LR = LR / 127.5 - 1.
+        HR = Image.open(self.input_list[idx]).convert('RGB')
+        HR = self.hr_transform(HR)
         
-        LR_sr = np.array(Image.fromarray(np.uint8(LR)).resize((w, h), Image.BICUBIC))
-        LR_sr = LR_sr.astype(np.float32)
-        LR_sr = LR_sr / 127.5 - 1.
+        LR = self.lr_transform(HR)
         
-        sample = {'HR': HR,  
-                  'LR': LR,
-                  'LR_sr': LR_sr}
-
-        if self.transform:
-            sample = self.transform(sample)
-            
-        return sample
-
-
-class TestSet(Dataset):
-    def __init__(self, args, transform=transforms.Compose([ToTensor()])):
-        self.input_list = sorted(glob.glob(os.path.join(args.test_dataset_dir)))
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.input_list)
-
-    def __getitem__(self, idx):
-        HR = imread(self.input_list[idx])
-        h, w = HR.shape[:2]
-        h, w = h//4*4, w//4*4
-        HR = HR[:h, :w, :]
-        HR = HR.astype(np.float32)
-        HR = HR / 127.5 - 1.
-
-        LR = np.array(Image.fromarray(np.uint8(HR)).resize((w//4, h//4), Image.BICUBIC))
-        LR = LR.astype(np.float32)
-        LR = LR / 127.5 - 1.
+        sample = {'HR': HR,
+                  'LR': LR}
         
-        LR_sr = np.array(Image.fromarray(np.uint8(LR)).resize((w, h), Image.BICUBIC))
-        LR_sr = LR_sr.astype(np.float32)
-        LR_sr = LR_sr / 127.5 - 1.
-        
-        sample = {'HR': HR,  
-                  'LR': LR,
-                  'LR_sr': LR_sr}
-
-        if self.transform:
-            sample = self.transform(sample)
-            
         return sample

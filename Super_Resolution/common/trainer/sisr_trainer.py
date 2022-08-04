@@ -1,8 +1,10 @@
 import os
+from PIL import Image
 
-from imageio import imsave, imread
 import numpy as np
+from imageio import imsave
 import torch
+from torchvision import transforms
 
 from .base_trainer import BaseTrainer
 
@@ -19,7 +21,7 @@ class SISR_Trainer(BaseTrainer):
             self.optimizer.zero_grad()
             
             sample_batched = self.to_device(sample_batched)
-            lr = sample_batched['LR_sr']
+            lr = sample_batched['LR']
             hr = sample_batched['HR']
             
             sr = self.model(lr)
@@ -46,33 +48,31 @@ class SISR_Trainer(BaseTrainer):
         with torch.no_grad():
             for i_batch, sample_batched in enumerate(self.dataloader['test']):
                 sample_batched = self.to_device(sample_batched)
-                lr = sample_batched['LR_sr']
+                lr = sample_batched['LR']
                 hr = sample_batched['HR']
                 
                 sr = self.model(lr)
                 
                 if self.args.eval_save_results:
-                    sr_save = (sr + 1.) * 127.5
+                    sr_save = (sr + 0.5)*255.
                     sr_save = np.transpose(sr_save.squeeze().round().cpu().numpy(), (1, 2, 0)).astype(np.uint8)
                     imsave(os.path.join(self.args.save_dir, 'save_results', str(i_batch).zfill(5) + '.png'), sr_save)
+        self.logger.info('Eval Done')
     
     def test(self):
         self.logger.info('Test')
         self.logger.info(f'LR path {self.args.lr_path}')
         
-        lr = imread(self.args.lr_path)
-        h, w = lr.shape[:2]
-        lr = lr.astype(np.float32)
-        lr = lr/127.5 - 1.
-        lr_t = torch.from_numpy(lr.transpose((2, 0, 1))).unsqueeze(0).float().to(self.device)
+        lr = Image.open(self.args.lr_path).convert('RGB')
+        lr = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=[0.5 for _ in range(self.args.img_channels)], std=[0.5 for _ in range(self.args.img_channels)])])(lr)
+        lr = lr.unsqueeze(0).to(self.device)
         
         self.model.eval()
         with torch.no_grad():
-            sr = self.model(lr_t)
-            sr_save = (sr + 1.)*127.5
-            sr_save = np.transpose(sr_save.squeeze().round().cpu().numpy(), (1, 2, 0)).astype(np.uint8)
+            sr = self.model(lr)
+            sr = transforms.ToPILImage()((sr.squeeze(0)*0.5) + 0.5)
             save_path = os.path.join(self.args.save_dir, 'save_results', os.path.basename(self.args.lr_path))
-            imsave(save_path, sr_save)
+            sr.save(save_path)
             self.logger.info(f'output path: {save_path}')
             
         self.logger.info('Test Done')
