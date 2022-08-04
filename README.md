@@ -18,7 +18,7 @@
 * ViTGAN: Training GANs with Vision Transformers [[pdf]](https://arxiv.org/pdf/2107.04589.pdf)
 
 ## Super Resolution
-* Image Super-Resolution Using Deep Convolutional Networks [[pdf]](https://arxiv.org/pdf/1501.00092.pdf)
+* Image Super-Resolution Using Deep Convolutional Networks [[pdf]](https://arxiv.org/pdf/1501.00092.pdf) [[code]](./Super_Resolution/SRCNN)
 * Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network [[pdf]](https://arxiv.org/pdf/1609.04802.pdf) [[code]](./Super_Resolution/SRGAN)
 * Learning Texture Transformer Network for Image Super-Resolution [[pdf]](https://arxiv.org/pdf/2006.04139v2.pdf)
 
