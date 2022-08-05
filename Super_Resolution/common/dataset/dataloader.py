@@ -10,7 +10,7 @@ def get_sisr_dataloader(args):
     train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
     
     test_data = getattr(m, 'SISR_Dataset')(args, args.test_dataset_dir)
-    test_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle=False, num_workers=args.num_workers)
     
     dataloader = {'train': train_loader, 'test': test_loader}
     

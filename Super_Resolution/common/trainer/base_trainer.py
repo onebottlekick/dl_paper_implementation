@@ -17,6 +17,11 @@ class BaseTrainer(metaclass=ABCMeta):
         
         self.params = model.parameters()
         self.optimizer = optimizer(self.params, lr=args.learning_rate)
+        
+        self.max_psnr = 0.
+        self.max_psnr_epoch = 0
+        self.max_ssim = 0.
+        self.max_ssim_epoch = 0
                 
     def load(self, model_path=None):
         if model_path:

@@ -20,20 +20,21 @@ class Logger:
 
 def mkExpDir(args):
     if (os.path.exists(args.save_dir)):
-        if (not args.reset):
-            raise SystemExit('Error: save_dir "' + args.save_dir + '" already exists! Please set --reset True to delete the folder.')
-        else:
+        # if (not args.reset):
+        #     raise SystemExit('Error: save_dir "' + args.save_dir + '" already exists! Please set --reset True to delete the folder.')
+        # else:
+        if args.reset:
             shutil.rmtree(args.save_dir)
 
-    os.makedirs(args.save_dir)
+    os.makedirs(args.save_dir, exist_ok=True)
 
     if ((not args.eval) and (not args.test)):
-        os.makedirs(os.path.join(args.save_dir, 'model'))
+        os.makedirs(os.path.join(args.save_dir, 'model'), exist_ok=True)
     
     if ((args.eval and args.eval_save_results) or args.test):
-        os.makedirs(os.path.join(args.save_dir, 'save_results'))
+        os.makedirs(os.path.join(args.save_dir, 'save_results'), exist_ok=True)
 
-    args_file = open(os.path.join(args.save_dir, 'args.txt'), 'w')
+    args_file = open(os.path.join(args.save_dir, f'{args.log_file_name.strip(".log")}_args.txt'), 'w')
     for k, v in vars(args).items():
         args_file.write(k.rjust(30,' ') + '\t' + str(v) + '\n')
 

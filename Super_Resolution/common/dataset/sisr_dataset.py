@@ -12,7 +12,8 @@ class SISR_Dataset(Dataset):
         self.input_list = sorted([os.path.join(path, name) for name in os.listdir(path)])
         
         self.hr_transform = transforms.Compose([
-            transforms.RandomCrop(args.img_size),
+            # transforms.RandomCrop(args.img_size),
+            transforms.CenterCrop(args.img_size),
             transforms.RandomHorizontalFlip(),
             transforms.RandomVerticalFlip(),
             transforms.ToTensor(),

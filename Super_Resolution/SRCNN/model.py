@@ -18,6 +18,8 @@ class SRCNN(nn.Module):
         
         self.upsample = nn.Upsample(scale_factor=args.lr_scale, mode='bicubic')
         
+        # self.apply(self._init_weights)
+        
     def forward(self, x):
         x = self.upsample(x)
         
@@ -26,3 +28,9 @@ class SRCNN(nn.Module):
         x = self.reconstruction(x)
         
         return x
+    
+    def _init_weights(self, m):
+        if isinstance(m, nn.Conv2d):
+            nn.init.normal_(m.weight, mean=0, std=0.001)
+            if hasattr(m, 'bias') and m.bias is not None:
+                nn.init.zeros_(m.bias)
