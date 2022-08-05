@@ -1,10 +1,10 @@
 # DL Papers
 
 ## Image Classification
+* ImageNet Classification with Deep Convolutional Neural Networks [[pdf]](https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf) [[code]](./Image_Classification/AlexNet.py)
 * Very Deep Convolutional Networks for Large-Scale Image Recognition [[pdf]](https://arxiv.org/pdf/1409.1556.pdf) [[code]](./Image_Classification/VGG.py)
 * Deep Residual Learning for Image Recognition [[pdf]](https://arxiv.org/pdf/1512.03385.pdf) [[code]](./Image_Classification/ResNet.py)
 * Going Deeper with Convolutions [[pdf]](https://arxiv.org/pdf/1409.4842.pdf) [[code]](./Image_Classification/GoogLeNet.py)
-* ImageNet Classification with Deep Convolutional Neural Networks [[pdf]](https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf) [[code]](./Image_Classification/AlexNet.py)
 * Dynamic Routing Between Capsules [[pdf]](https://arxiv.org/pdf/1710.09829.pdf) [[code]](./Image_Classification/capsnet)
 * Exploring Randomly Wired Neural Networks for Image Recognition [[pdf]](https://arxiv.org/pdf/1904.01569.pdf) [[code]](./Image_Classification/RandWireNet)
 * AN IMAGE IS WORTH 16X16 WORDS:TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE [[pdf]](https://arxiv.org/pdf/2010.11929v2.pdf) [[code]](./Image_Classification/vision_transformer)
@@ -13,8 +13,8 @@
 
 ## Generative Models
 * Generative Adversarial Networks [[pdf]](https://arxiv.org/pdf/1406.2661.pdf) [[code]](./Generative_Models/GAN.py)
-* Image-to-Image Translation with Conditional Adversarial Networks [[pdf]](https://arxiv.org/pdf/1611.07004.pdf) [[code]](./Generative_Models/pix2pix.py)
 * Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks [[pdf]](https://arxiv.org/pdf/1511.06434.pdf) [[code]](./Generative_Models/DCGAN.py)
+* Image-to-Image Translation with Conditional Adversarial Networks [[pdf]](https://arxiv.org/pdf/1611.07004.pdf) [[code]](./Generative_Models/pix2pix.py)
 * ViTGAN: Training GANs with Vision Transformers [[pdf]](https://arxiv.org/pdf/2107.04589.pdf)
 
 ## Super Resolution
