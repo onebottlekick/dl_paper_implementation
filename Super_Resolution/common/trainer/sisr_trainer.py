@@ -94,7 +94,6 @@ class SISR_Trainer(BaseTrainer):
         self.model.eval()
         with torch.no_grad():
             sr = self.model(lr)
-            sr = transforms.ToPILImage()(sr.squeeze(0))
             sr = transforms.ToPILImage()((sr.squeeze(0) + 0.5)*255.)
             save_path = os.path.join(self.args.save_dir, 'save_results', f'{os.path.basename(self.args.lr_path).split(".")[0]}_{self.args.log_file_name.split(".")[0]}.png')
             sr.save(save_path)
