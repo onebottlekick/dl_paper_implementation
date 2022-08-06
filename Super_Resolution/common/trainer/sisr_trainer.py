@@ -57,7 +57,7 @@ class SISR_Trainer(BaseTrainer):
                 sr = self.model(lr)
                 
                 if self.args.eval_save_results:
-                    sr_save = (sr + 0.5)*255.
+                    sr_save = (sr + 1.)*127.5
                     sr_save = np.transpose(sr_save.squeeze().round().cpu().numpy(), (1, 2, 0)).astype(np.uint8)
                     imsave(os.path.join(self.args.save_dir, 'save_results', str(i_batch).zfill(5) + '.png'), sr_save)
                 
@@ -85,16 +85,18 @@ class SISR_Trainer(BaseTrainer):
         self.logger.info(f'LR path {self.args.lr_path}')
         
         lr = Image.open(self.args.lr_path).convert('RGB')
-        lr = transforms.Compose([
-            transforms.ToTensor(), 
-            transforms.Normalize(mean=[0.5 for _ in range(self.args.img_channels)], std=[0.5 for _ in range(self.args.img_channels)])
-            ])(lr)
+        lr = np.array(lr).transpose(2, 0, 1)
+        lr = lr/127.5 - 1.
+        lr = torch.tensor(lr).float()
         lr = lr.unsqueeze(0).to(self.device)
         
         self.model.eval()
         with torch.no_grad():
             sr = self.model(lr)
-            sr = transforms.ToPILImage()((sr.squeeze(0) + 0.5)*255.)
+            sr = sr.squeeze(0).detach().cpu().numpy().transpose(1, 2, 0)
+            sr = (sr + 1.)*127.5
+            sr = Image.fromarray(sr.astype(np.uint8))
+            # sr = transforms.ToPILImage()((sr.squeeze(0) + 1.)*127.5)
             save_path = os.path.join(self.args.save_dir, 'save_results', f'{os.path.basename(self.args.lr_path).split(".")[0]}_{self.args.log_file_name.split(".")[0]}.png')
             sr.save(save_path)
             self.logger.info(f'output path: {save_path}')
