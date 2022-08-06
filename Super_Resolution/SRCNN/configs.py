@@ -8,6 +8,8 @@ parser.add_argument('--test_dataset_dir')
 parser.add_argument('--lr_scale', type=int, default=4, help='low resolution scale')
 parser.add_argument('--num_workers', type=int, default=4, help='number of workers for data loader')
 
+parser.add_argument('--resume', type=bool, default=False, help='resume from checkpoint')
+parser.add_argument('--start_epoch', type=int, default=1, help='start epoch')
 parser.add_argument('--reset', type=bool, default=False, help='reset save_dir')
 parser.add_argument('--save_dir', type=str, default='save_dir', help='Directory to save log, arguments, models')
 parser.add_argument('--log_file_name', type=str, default='SRCNN.log', help='Log file name')

@@ -36,7 +36,9 @@ if __name__ == '__main__':
         trainer.eval()
         
     else:
-        for epoch in range(1, args.num_epochs+1):
+        if args.resume:
+            trainer.load(model_path=args.model_path)
+        for epoch in range(args.start_epoch, args.num_epochs+1):
             trainer.train(cur_epoch=epoch)
             if epoch%args.val_every == 0:
                 trainer.eval(cur_epoch=epoch)
