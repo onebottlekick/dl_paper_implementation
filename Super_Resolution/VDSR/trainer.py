@@ -42,7 +42,7 @@ class Trainer(SISR_Trainer):
                 self.logger.info(f'Epoch: {cur_epoch}\tbatch: {i_batch + 1}')
                 self.logger.info(f'loss: {loss.item():.4f}')
             loss.backward()
-            nn.utils.clip_grad_norm_(self.model.parameters(), self.args.grad_clip)
+            nn.utils.clip_grad_norm_(self.model.parameters(), self.args.clip_grad)
             self.optimizer.step()
             
         if cur_epoch%self.args.save_every == 0:

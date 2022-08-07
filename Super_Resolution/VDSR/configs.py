@@ -33,6 +33,7 @@ parser.add_argument('--lr_decay_rate', type=float, default=0.1, help='Learning r
 parser.add_argument('--lr_decay_step', type=int, default=20, help='Learning rate decay step')
 parser.add_argument('--momentum', type=float, default=0.9, help='Momentum')
 parser.add_argument('--weight_decay', type=float, default=1e-4, help='Weight decay')
+parser.add_argument('--clip_grad', type=float, default=0.4, help='Clip gradients')
 parser.add_argument('--batch_size', type=int, default=64, help='Batch size')
 parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs')
 parser.add_argument('--print_every', type=int, default=99999, help='Print every')
