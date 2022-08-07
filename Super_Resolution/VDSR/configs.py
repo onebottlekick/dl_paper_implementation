@@ -29,6 +29,8 @@ parser.add_argument('--num_res_blocks', type=int, default=18, help='Number of re
 
 # training parameters
 parser.add_argument('-lr', '--learning_rate', type=float, default=1e-1, help='Learning rate')
+parser.add_argument('--lr_decay_rate', type=float, default=0.1, help='Learning rate decay rate')
+parser.add_argument('--lr_decay_step', type=int, default=20, help='Learning rate decay step')
 parser.add_argument('--momentum', type=float, default=0.9, help='Momentum')
 parser.add_argument('--weight_decay', type=float, default=1e-4, help='Weight decay')
 parser.add_argument('--batch_size', type=int, default=64, help='Batch size')

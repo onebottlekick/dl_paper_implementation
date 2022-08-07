@@ -2,14 +2,16 @@ python main.py --save_dir ./train/VDSR `
                --log_file_name train.log `
                --num_gpu 1 `
                --reset True `
-               --train_dataset_dir C:/Users/Admin/Datasets/CUFED/train/input `
-               --test_dataset_dir C:/Users/Admin/Datasets/BSDS200 `
+               --train_dataset_dir $(train_dataset_dir) `
+               --test_dataset_dir $(test_dataset_dir) `
                --lr_scale 3 `
                --img_size 156 156 `
                --img_channels 3 `
                --res_channels 64 `
                --num_res_blocks 18 `
                --learning_rate 1e-1 `
+               --lr_decay_rate 0.1 `
+               --lr_decay_step 20 `
                --momentum 0.9 `
                --weight_decay 1e-4 `
                --batch_size 64 `

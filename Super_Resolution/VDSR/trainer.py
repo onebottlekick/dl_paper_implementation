@@ -17,7 +17,7 @@ class Trainer(SISR_Trainer):
     def __init__(self, args, logger, dataloader, model, criterion, optimizer):
         super().__init__(args, logger, dataloader, model, criterion, optimizer)
         
-        self.optimizer = optimizer(model.parameters(), momentum=args.momentum, weight_decay=args.weight_decay)
+        self.optimizer = optimizer(model.parameters(), lr=args.learning_rate, momentum=args.momentum, weight_decay=args.weight_decay)
         
     def train(self, cur_epoch=0):
         self.model.train()

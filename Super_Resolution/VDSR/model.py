@@ -8,19 +8,19 @@ class VDSR(nn.Module):
         super().__init__()
         self.args = args
         
-        self.first_layer = nn.Conv2d(self.args.img_channels, 64, 3, 1, 1, bias=False)
+        self.first_layer = nn.Conv2d(self.args.img_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.residual_layer = nn.Sequential(*[self._block() for _ in range(self.args.num_res_blocks)])
-        self.last_layer = nn.Conv2d(64, self.args.img_channels, 3, 1, 1, bias=False)
+        self.last_layer = nn.Conv2d(64, self.args.img_channels, kernel_size=3, stride=1, padding=1, bias=False)
         
         self.relu = nn.ReLU(True)
         
-        self.upsample = nn.Upsample(scale_factor=2, mode='bicubic')
+        self.upsample = nn.Upsample(scale_factor=args.lr_scale, mode='bicubic')
         
         self.apply(self._init_weights)
         
     def _block(self):
         block = nn.Sequential(
-            nn.Conv2d(self.args.res_channels, self.args.res_channels, 3, 1, 1, bias=False),
+            nn.Conv2d(self.args.res_channels, self.args.res_channels, kernel_size=3, stride=1, padding=1, bias=False),
             nn.ReLU(True)
         )
         return block
@@ -31,6 +31,7 @@ class VDSR(nn.Module):
             m.weight.data.normal_(0, math.sqrt(2./n))
                 
     def forward(self, x):
+        x = self.upsample(x)
         _x = x
         x = self.relu(self.first_layer(x))
         x = self.residual_layer(x)
