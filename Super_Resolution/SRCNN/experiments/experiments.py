@@ -3,10 +3,8 @@ import sys
 sys.path.append('../')
 import warnings
 warnings.filterwarnings('ignore')
-from PIL import Image
 
 import torch
-import numpy as np
 
 from configs import args
 from model import SRCNN
