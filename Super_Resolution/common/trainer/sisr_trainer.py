@@ -85,6 +85,11 @@ class SISR_Trainer(BaseTrainer):
         self.logger.info(f'LR path {self.args.lr_path}')
         
         lr = Image.open(self.args.lr_path).convert('RGB')
+        
+        w, h = lr.size
+        lr_bicubic = lr.resize((w*self.args.lr_scale, h*self.args.lr_scale), Image.BICUBIC)
+        lr_bicubic.save(os.path.join(self.args.save_dir, 'save_results', f'{os.path.basename(self.args.lr_path).split(".")[0]}_bicubic.png'))
+        
         lr = np.array(lr).transpose(2, 0, 1)
         lr = lr/127.5 - 1.
         lr = torch.tensor(lr).float()
