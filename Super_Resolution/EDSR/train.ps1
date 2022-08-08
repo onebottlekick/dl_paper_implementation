@@ -1,0 +1,15 @@
+python main.py --save_dir ./train/EDSR `
+               --log_file_name train.log `
+               --num_gpu 1 `
+               --reset True `
+               --train_dataset_dir $(train_dataset_dir) `
+               --test_dataset_dir  $test_dataset_dir `
+               --img_size 156 156 `
+               --lr_scale 3 `
+               --img_channels 3 `
+               --lr_decay_step 20 `
+               --batch_size 16 `
+               --num_epochs 100 `
+               --print_every 120 `
+               --save_every 10 `
+               --val_every 10
