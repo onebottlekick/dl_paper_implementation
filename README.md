@@ -20,6 +20,7 @@
 ## Super Resolution
 * Image Super-Resolution Using Deep Convolutional Networks [[pdf]](https://arxiv.org/pdf/1501.00092.pdf) [[code]](./Super_Resolution/SRCNN)
 * Accurate Image Super-Resolution Using Very Deep Convolutional Networks [[pdf]](https://arxiv.org/pdf/1511.04587.pdf) [[code]](./Super_Resolution/VDSR)
+* Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel Convolutional Neural Network [[pdf]](https://arxiv.org/pdf/1609.05158.pdf)
 * Deeply-Recursive Convolutional Network for Image Super-Resolution [[pdf]](https://arxiv.org/pdf/1511.04491.pdf)
 * Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network [[pdf]](https://arxiv.org/pdf/1609.04802.pdf) [[code]](./Super_Resolution/SRGAN)
 * Enhanced Deep Residual Networks for Single Image Super-Resolution [[pdf]](https://openaccess.thecvf.com/content_cvpr_2017_workshops/w12/papers/Lim_Enhanced_Deep_Residual_CVPR_2017_paper.pdf) [[code]](./Super_Resolution/EDSR)
