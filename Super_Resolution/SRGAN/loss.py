@@ -36,11 +36,9 @@ class AdversarialLoss(nn.Module):
         self.optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.epsilon)
         self.bce_loss = nn.BCELoss()
         
-    def forward(self, gen, real):
-        gen = gen.detach()
-        
+    def forward(self, gen, real):        
         self.optimizer.zero_grad()
-        d_fake = self.discriminator(gen)
+        d_fake = self.discriminator(gen.detach())
         d_real = self.discriminator(real)
         
         valid = torch.ones(real.shape[0], 1).to(self.device)
