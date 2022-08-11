@@ -1,106 +1,78 @@
 import torch
 import torch.nn as nn
 
-
-class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, discriminator=False, use_activation=True, use_batchnorm=True, **kwargs):
-        super(ConvBlock, self).__init__()
-        self.use_activation = use_activation
-        
-        self.conv = nn.Conv2d(in_channels, out_channels, **kwargs, bias=not use_activation)
-        self.batchnorm = nn.BatchNorm2d(out_channels) if use_batchnorm else nn.Identity()
-        self.activation = nn.LeakyReLU(0.2, True) if discriminator else nn.PReLU(out_channels)
-
-    def forward(self, x):
-        if self.use_activation:
-            return self.activation(self.batchnorm(self.conv(x)))
-        return self.batchnorm(self.conv(x))
+from modules import ConvBlock, ResidualBlock, UpsampleBlock
+from utils import calc_shape
 
 
-class UpsampleBlock(nn.Module):
-    def __init__(self, in_channels, scale_factor=2):
-        super(UpsampleBlock, self).__init__()
-        
-        self.conv = nn.Conv2d(in_channels, in_channels*scale_factor**2, kernel_size=3, stride=1, padding=1)
-        self.pixel_shuffle = nn.PixelShuffle(scale_factor)
-        self.activation = nn.PReLU(in_channels)
-        
-    def forward(self, x):
-        return self.activation(self.pixel_shuffle(self.conv(x)))
-
-    
-class ResidualBlock(nn.Module):
-    def __init__(self, in_channels):
-        super(ResidualBlock, self).__init__()
-        
-        self.module1 = ConvBlock(in_channels, in_channels, kernel_size=3, stride=1, padding=1)
-        self.module2 = ConvBlock(in_channels, in_channels, kernel_size=3, stride=1, padding=1, use_activation=False)
-
-    def forward(self, x):
-        out = self.module1(x)
-        out = self.module2(x)
-        
-        return out + x
-    
-    
 class Generator(nn.Module):
-    def __init__(self, in_channels=3, num_channels=64, num_blocks=16):
-        super(Generator, self).__init__()
+    def __init__(self, args):
+        super().__init__()
         
-        self.init = ConvBlock(in_channels, num_channels, kernel_size=9, stride=1, padding=4, use_batchnorm=False)
-        self.residual = nn.Sequential(*[ResidualBlock(num_channels) for _ in range(num_blocks)])
-        self.conv = ConvBlock(num_channels, num_channels, kernel_size=3, stride=1, padding=1, use_activation=False)
-        self.upsample = nn.Sequential(*[UpsampleBlock(num_channels) for _ in range(2)])
-        self.final_conv = nn.Conv2d(num_channels, in_channels, kernel_size=9, stride=1, padding=4)
+        self.conv1 = ConvBlock(args.img_channels, 64, kernel_size=9, padding=4, batchnorm=False, activation=nn.PReLU())
+        self.residuals = nn.Sequential(*[ResidualBlock(64, 64) for _ in range(args.num_residual_blocks)])
+        self.conv2 = ConvBlock(64, 64)
+        self.upsample1 = UpsampleBlock(64, 256, lr_scale=args.lr_scale//2)
+        self.upsample2 = UpsampleBlock(256//((args.lr_scale//2)**2), 256, lr_scale=args.lr_scale//2)
+        self.conv3 = nn.Conv2d(256//((args.lr_scale//2)**2), args.img_channels, kernel_size=9, padding=4)
         
     def forward(self, x):
-        init = self.init(x)
-        x = self.residual(init)
-        x = self.conv(x) + init
-        x = self.upsample(x)
-        x = self.final_conv(x)
-        x = torch.tanh(x)
+        x = self.conv1(x)
+        _x = x
+        x = self.residuals(x)
+        x = self.conv2(x)
+        x = x + _x
+        x = self.upsample1(x)
+        x = self.upsample2(x)
+        x = self.conv3(x)
         
         return x
     
-
+    
 class Discriminator(nn.Module):
-    def __init__(self, in_channels=3, features=[64, 64, 128, 128, 256, 256, 512, 512]):
-        super(Discriminator, self).__init__()
-        self.in_channels = in_channels
-        self.features = features
+    def __init__(self, args):
+        super().__init__()
         
-        self.blocks = nn.Sequential(*self._blocks())
-        self.classifier = nn.Sequential(
-            nn.AdaptiveAvgPool2d((6, 6)),
-            nn.Flatten(),
-            nn.Linear(512*6*6, 1024),
-            nn.LeakyReLU(0.2, True),
-            nn.Linear(1024, 1),
-            nn.Sigmoid()
-        )
+        self.conv1 = ConvBlock(args.img_channels, 64, kernel_size=3, batchnorm=False, activation=nn.LeakyReLU(0.2))
+        self.conv2 = ConvBlock(64, 64, stride=2, activation=nn.LeakyReLU(0.2))
+        self.conv3 = ConvBlock(64, 128, activation=nn.LeakyReLU(0.2))
+        self.conv4 = ConvBlock(128, 128, stride=2, activation=nn.LeakyReLU(0.2))
+        self.conv5 = ConvBlock(128, 256, activation=nn.LeakyReLU(0.2))
+        self.conv6 = ConvBlock(256, 256, stride=2, activation=nn.LeakyReLU(0.2))
+        self.conv7 = ConvBlock(256, 512, activation=nn.LeakyReLU(0.2))
+        self.conv8 = ConvBlock(512, 512, stride=2, activation=nn.LeakyReLU(0.2))
+        h, w = calc_shape(args.img_size)
+        self.fc1 = nn.Linear(512*h*w, 1024)
+        self.leakyrelu = nn.LeakyReLU(0.2)
+        self.fc2 = nn.Linear(1024, 1)
+        self.sigmoid = nn.Sigmoid()
         
     def forward(self, x):
-        x = self.blocks(x)
-        x = self.classifier(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        x = self.conv5(x)
+        x = self.conv6(x)
+        x = self.conv7(x)
+        x = self.conv8(x)
+        x = x.view(x.shape[0], -1)
+        x = self.fc1(x)
+        x = self.leakyrelu(x)
+        x = self.fc2(x)
+        x = self.sigmoid(x)
         
         return x
-        
-    def _blocks(self):
-        blocks = []
-        in_channels = self.in_channels
-        for idx, feature in enumerate(self.features):
-            blocks.append(ConvBlock(in_channels, feature, kernel_size=3, stride=1+idx%2, padding=1, discriminator=True,use_batchnorm=False if idx == 0 else True))
-            in_channels = feature
-        
-        return blocks
-
+    
 
 if __name__ == '__main__':
-    x = torch.randn(1, 3, 100, 100)
-    generator = Generator()
-    discriminator = Discriminator()
+    from configs import args
+    generator = Generator(args)
+    x = torch.randn(1, args.img_channels, *args.img_size)
+    discriminator = Discriminator(args)
     
     gen = generator(x)
-    assert gen.shape == (1, 3, 400, 400)
-    assert discriminator(gen).shape == (1, 1)
+    y = discriminator(gen)
+    
+    assert gen.shape == (1, args.img_channels, args.img_size[0]*args.lr_scale, args.img_size[1]*args.lr_scale)
+    assert y.shape == (1, 1)

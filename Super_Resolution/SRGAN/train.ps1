@@ -1,0 +1,32 @@
+python main.py --save_dir ./train/SRResNet `
+               --log_file_name train_srresnet.log `
+               --num_gpu 1 `
+               --reset True `
+               --train_dataset_dir $(train_dataset_dir) `
+               --test_dataset_dir  $(test_dataset_dir) `
+               --img_size 156 156 `
+               --img_channels 3 `
+               --batch_size 64 `
+               --num_epochs 100 `
+               --print_every 120 `
+               --save_every 10 `
+               --val_every 10 `
+               --loss mse_only ;
+               
+python main.py --save_dir ./train/SRGAN `
+               --log_file_name train_srgan.log `
+               --num_gpu 1 `
+               --reset True `
+               --train_dataset_dir $(train_dataset_dir) `
+               --test_dataset_dir  $(test_dataset_dir) `
+               --img_size 156 156 `
+               --img_channels 3 `
+               --batch_size 32 `
+               --num_epochs 100 `
+               --print_every 120 `
+               --save_every 10 `
+               --val_every 10 `
+               --model_path $(srresnet_model_path) `
+               --loss perceptual_vgg `
+               --vgg_type 54 `
+               --adversarial_loss_weight 1e-3 ;
