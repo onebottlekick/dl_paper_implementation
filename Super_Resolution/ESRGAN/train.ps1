@@ -1,0 +1,19 @@
+python main.py --save_dir ./train/ESRGAN `
+               --log_file_name train.log `
+               --num_gpu 1 `
+               --reset True `
+               --train_dataset_dir $(train_dataset_dir) `
+               --test_dataset_dir  $(test_dataset_dir) `
+               --img_size 156 156 `
+               --img_channels 3 `
+               --batch_size 16 `
+               --num_epochs 100 `
+               --print_every 120 `
+               --save_every 10 `
+               --val_every 10 `
+               --basic_block RRDB `
+               --num_dense_blocks 3 `
+               -- beta 0.2 `
+               --num_blocks 24 `
+               --lambda_ 5e-3 `
+               --eta 1e-2
