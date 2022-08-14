@@ -3,14 +3,16 @@ import torch.nn as nn
 
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, activation=None):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, activation=None, batchnorm=False):
         super().__init__()
 
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.batchnorm = nn.BatchNorm2d(out_channels) if batchnorm else nn.Identity()
         self.activation = activation if activation is not None else nn.Identity()
 
     def forward(self, x):
         x = self.conv(x)
+        x = self.batchnorm(x)
         x = self.activation(x)
 
         return x
@@ -58,7 +60,7 @@ class RRDB(nn.Module):
         super().__init__()
         self.beta = beta
         
-        self.dense_blocks = [DenseBlock(self.beta) for _ in range(num_dense_blocks)]
+        self.dense_blocks = nn.ModuleList([DenseBlock(self.beta) for _ in range(num_dense_blocks)])
         
     def forward(self, x):
         for dense_block in self.dense_blocks:
