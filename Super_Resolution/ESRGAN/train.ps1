@@ -13,7 +13,6 @@ python main.py --save_dir ./train/ESRGAN `
                --val_every 10 `
                --basic_block RRDB `
                --num_dense_blocks 3 `
-               -- beta 0.2 `
                --num_blocks 24 `
                --lambda_ 5e-3 `
                --eta 1e-2
