@@ -30,7 +30,7 @@ class TrainDataset(Dataset):
         self.hr_transform = transforms.Compose([
             ToTensor(),
             # transforms.RandomCrop(args.img_size),
-            transforms.CenterCrop(args.img_size) if self.args.batch_size != 1 else Identity(),
+            transforms.CenterCrop(args.img_size), # if self.args.batch_size != 1 else Identity(),
             transforms.RandomHorizontalFlip(),
             transforms.RandomVerticalFlip(),
         ])
