@@ -10,14 +10,14 @@ from common.dataset.dataloader import get_dataloader
 from common.logger import mkExpDir
 from trainer import Trainer
 from configs import args
-from model import Generator
+from model import ESRGAN
 from loss import VGGLoss, AdversarialLoss
 
 
 if __name__ == '__main__':
     _logger = mkExpDir(args)
     _dataloader = get_dataloader(args) if not args.test else None
-    _model = Generator(args)
+    _model = ESRGAN(args)
     _criterion = VGGLoss(args)
     _optimizer = torch.optim.Adam
     _adversarial_loss = AdversarialLoss(args)

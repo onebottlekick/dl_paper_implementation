@@ -23,7 +23,6 @@ class VGGLoss(nn.Module):
         return self.loss(x, y)
     
 
-# TODO implement relativistic gan loss
 class AdversarialLoss(nn.Module):
     def __init__(self, args):
         super().__init__()
@@ -31,11 +30,28 @@ class AdversarialLoss(nn.Module):
         self.device = 'cpu' if args.cpu else 'cuda'
         self.discriminator = Discriminator(args).to(self.device)
         self.optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.epsilon)
-        self.bce_loss = nn.BCELoss()
+        self.bce_loss = nn.BCEWithLogitsLoss()
         
     def forward(self, gen, real):        
-        pass
-    
+        self.optimizer.zero_grad()
+        d_fake = self.discriminator(gen.detach())
+        d_real = self.discriminator(real)
+        
+        valid = torch.ones(real.shape[0], 1).to(self.device)
+        fake = torch.zeros(real.shape[0], 1).to(self.device)
+                
+        real_loss = self.bce_loss(d_real - d_fake.mean(0, keepdim=True), valid)
+        fake_loss = self.bce_loss(d_fake - d_real.mean(0, keepdim=True), fake)
+
+        d_loss = (real_loss + fake_loss) / 2.
+        
+        d_loss.backward()
+        self.optimizer.step()
+        
+        g_loss = self.bce_loss(self.discriminator(gen) - self.discriminator(real).detach().mean(0, keepdim=True), valid)
+        
+        return g_loss
+            
     
 if __name__ == '__main__':
     vgg = vgg19(pretrained=True).features

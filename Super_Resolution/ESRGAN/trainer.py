@@ -33,8 +33,7 @@ class Trainer(SISR_Trainer):
             is_print = ((i_batch + 1) %self.args.print_every == 0)
             
             loss = self.criterion(sr, hr)
-            if 'vgg' in self.args.loss.lower():
-                loss = loss*((1/12.75)**2)
+            # loss = loss*((1/12.75)**2)
             
             if (is_print):
                 self.logger.info(f'Epoch: {cur_epoch}\tbatch: {i_batch + 1}')
