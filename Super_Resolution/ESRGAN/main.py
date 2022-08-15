@@ -34,8 +34,9 @@ if __name__ == '__main__':
         trainer.eval()
         
     else:
-        if args.resume or _adversarial_loss:
+        if args.resume:
             trainer.load(model_path=args.model_path)
+            _adversarial_loss.discriminator.load_state_dict(torch.load(args.discriminator_path))
 
         for epoch in range(args.start_epoch, args.num_epochs+1):
             trainer.train(cur_epoch=epoch)

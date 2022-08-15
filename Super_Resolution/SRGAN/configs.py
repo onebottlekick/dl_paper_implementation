@@ -40,6 +40,7 @@ parser.add_argument('--num_epochs', type=int, default=100, help='Number of epoch
 parser.add_argument('--print_every', type=int, default=99999, help='Print every')
 parser.add_argument('--save_every', type=int, default=99999, help='Save every')
 parser.add_argument('--val_every', type=int, default=99999, help='Validate every')
+parser.add_argument('--discriminator_path', type=str, default=None, help='Path to discriminator model')
 
 # eval & test configs
 parser.add_argument('--eval', type=bool, default=False, help='Eval mode')

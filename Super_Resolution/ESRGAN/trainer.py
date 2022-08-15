@@ -57,3 +57,5 @@ class Trainer(SISR_Trainer):
             model_state_dict = self.model.state_dict()
             model_name = self.args.save_dir.strip('/') + '/model/' + self.args.log_file_name.strip('.log') + '_' + str(cur_epoch).zfill(5) + '.pth'
             torch.save(model_state_dict, model_name)
+            discriminator_state_dict = self.adversarial_loss.discriminator.state_dict()
+            torch.save(discriminator_state_dict, self.args.save_dir.strip('/') + '/model/' + 'discriminator' + '.pth')
