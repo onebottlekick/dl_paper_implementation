@@ -35,24 +35,21 @@ class ResidualBlock(nn.Module):
     
     
 class DenseBlock(nn.Module):
-    def __init__(self, beta=0.2):
+    def __init__(self, beta=0.2, in_channels=64, growth_channels=32):
         super().__init__()
         self.beta = beta
         
-        self.conv1 = ConvBlock(64, 32, activation=nn.LeakyReLU(0.2))
-        self.conv2 = ConvBlock(64 + 32, 32, activation=nn.LeakyReLU(0.2))
-        self.conv3 = ConvBlock(64 + 2*32, 32, activation=nn.LeakyReLU(0.2))
-        self.conv4 = ConvBlock(64 + 3*32, 32, activation=nn.LeakyReLU(0.2))
-        self.conv5 = ConvBlock(64 + 4*32, 64)
+        self.conv_blocks = nn.ModuleList([ConvBlock(in_channels + i*growth_channels, growth_channels, activation=nn.LeakyReLU(0.2)) if i != 4 \
+        else ConvBlock(in_channels + i*growth_channels, in_channels) for i in range(5)])
         
     def forward(self, x):
-        x1 = self.conv1(x)
-        x2 = self.conv2(torch.cat((x, x1), 1))
-        x3 = self.conv3(torch.cat((x, x1, x2), 1))
-        x4 = self.conv4(torch.cat((x, x1, x2, x3), 1))
-        x5 = self.conv5(torch.cat((x, x1, x2, x3, x4), 1))
-        
-        return x + self.beta*x5
+         _x = x
+        for conv_block in self.conv_blocks[:-1]:
+            out = conv_block(x)
+            x = torch.cat((x, out), dim=1)
+        x = self.conv_blocks[-1](x)
+                    
+        return _x + self.beta*x
     
 
 class RRDB(nn.Module):
