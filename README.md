@@ -26,6 +26,7 @@
 * Enhanced Deep Residual Networks for Single Image Super-Resolution [[pdf]](https://openaccess.thecvf.com/content_cvpr_2017_workshops/w12/papers/Lim_Enhanced_Deep_Residual_CVPR_2017_paper.pdf) [[code]](./Super_Resolution/EDSR)
 * ESRGAN: Enhanced Super-Resolution Generative Adversarial Networks [[pdf]](https://arxiv.org/pdf/1809.00219.pdf) [[code]](./Super_Resolution/ESRGAN)
 * RankSRGAN: Generative Adversarial Networks with Ranker for Image Super-Resolution [[pdf]](https://arxiv.org/pdf/1908.06382.pdf)
+* Efficient Deep Neural Network for Photo-realistic Image Super-Resolution [[pdf]](https://arxiv.org/pdf/1903.02240.pdf) [[code]](./Super_Resolution/PCARN)
 * Learning Texture Transformer Network for Image Super-Resolution [[pdf]](https://arxiv.org/pdf/2006.04139v2.pdf)
 
 ## Segmentation
