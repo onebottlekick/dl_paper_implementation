@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from modules import CascadingBlock, ECascadingBlock, UpsampleBlock
+from modules import CascadingBlock, ECascadingBlock, UpsampleBlock, ConvBlock
 
 
 class PCARN(nn.Module):
@@ -43,6 +43,28 @@ class PCARN(nn.Module):
         
         x = self.up(x)
         x = self.final_conv(x)
+        
+        return x
+    
+    
+class Discriminator(nn.Module):
+    def __init__(self, args):
+        super().__init__()
+        
+        self.layer = nn.Sequential(
+            ConvBlock(args.img_channels, 64, kernel_size=3, stride=1, padding=1, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(64, 64, kernel_size=4, stride=2, padding=1, batchnorm=True, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(64, 128, kernel_size=3, stride=1, padding=1, batchnorm=True, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(128, 128, kernel_size=4, stride=2, padding=1, batchnorm=True, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(128, 256, kernel_size=3, stride=1, padding=1, batchnorm=True, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(256, 256, kernel_size=4, stride=2, padding=1, batchnorm=True, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(256, 512, kernel_size=3, stride=1, padding=1, batchnorm=True, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(512, 512, kernel_size=3, stride=1, padding=1, batchnorm=True, activation=nn.LeakyReLU(0.2)),
+            ConvBlock(512, 1, kernel_size=3, stride=1, padding=1, activation=nn.Sigmoid())
+        )
+        
+    def forward(self, x):
+        x = self.layer(x)
         
         return x
 

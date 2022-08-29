@@ -3,17 +3,21 @@ import torch.nn as nn
 
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, activation=None, groups=1):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, activation=None, batchnorm=False, groups=1):
         super().__init__()
 
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=groups)            
-        self.activation = activation() if activation else None
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=groups)
+        self.batchnorm = nn.BatchNorm2d(out_channels) if batchnorm else None           
+        self.activation = activation if activation else None
         
     def forward(self, x):
+        x = self.conv(x)
+        
+        if self.batchnorm:
+            x = self.batchnorm(x)
+        
         if self.activation:
-            x = self.activation(self.conv(x))
-        else:
-            x = self.conv(x)
+            x = self.activation(x)
         
         return x
     
@@ -22,7 +26,7 @@ class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
         
-        self.conv1 = ConvBlock(in_channels, out_channels, activation=nn.ReLU)
+        self.conv1 = ConvBlock(in_channels, out_channels, activation=nn.ReLU(True))
         self.conv2 = ConvBlock(out_channels, out_channels)
         self.relu = nn.ReLU(True)
         
@@ -68,8 +72,8 @@ class EResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, groups):
         super().__init__()
         
-        self.conv1 = ConvBlock(in_channels, out_channels, activation=nn.ReLU, groups=groups)
-        self.conv2 = ConvBlock(out_channels, out_channels, activation=nn.ReLU, groups=groups)
+        self.conv1 = ConvBlock(in_channels, out_channels, activation=nn.ReLU(True), groups=groups)
+        self.conv2 = ConvBlock(out_channels, out_channels, activation=nn.ReLU(True), groups=groups)
         self.conv3 = ConvBlock(out_channels, out_channels, kernel_size=1, stride=1, padding=0)
         self.relu = nn.ReLU(True)
         
@@ -114,12 +118,12 @@ class UpsampleBlock(nn.Module):
         self.scale = scale
         
         self.scale2 = nn.Sequential(
-            ConvBlock(channels, 4*channels, activation=nn.ReLU, groups=groups),
+            ConvBlock(channels, 4*channels, activation=nn.ReLU(True), groups=groups),
             nn.PixelShuffle(2)
         )
         
         self.scale3 = nn.Sequential(
-            ConvBlock(channels, 9*channels, activation=nn.ReLU, groups=groups),
+            ConvBlock(channels, 9*channels, activation=nn.ReLU(True), groups=groups),
             nn.PixelShuffle(3)
         )
         
