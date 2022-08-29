@@ -18,7 +18,7 @@ class SRCNN(nn.Module):
         
         self.upsample = nn.Upsample(scale_factor=args.lr_scale, mode='bicubic')
         
-        self.apply(self._init_weights)
+        # self.apply(self._init_weights)
         
     def forward(self, x):
         x = self.upsample(x)

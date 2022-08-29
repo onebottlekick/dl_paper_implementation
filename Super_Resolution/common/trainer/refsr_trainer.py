@@ -4,7 +4,7 @@ from imageio import imsave, imread
 import numpy as np
 import torch
 
-from .base_trainer import BaseTrainer
+from common.trainer.base_trainer import BaseTrainer
 
 
 class RefSR_Trainer(BaseTrainer):

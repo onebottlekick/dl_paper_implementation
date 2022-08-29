@@ -1,6 +1,3 @@
-import os
-import sys
-sys.path.append('../')
 from PIL import Image
 
 import numpy as np

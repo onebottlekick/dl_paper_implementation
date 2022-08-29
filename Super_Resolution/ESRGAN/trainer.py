@@ -1,7 +1,3 @@
-import os
-import sys
-sys.path.append('../')
-
 import torch
 
 from common.trainer.sisr_trainer import SISR_Trainer

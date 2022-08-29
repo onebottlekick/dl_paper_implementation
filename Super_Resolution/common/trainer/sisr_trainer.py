@@ -6,8 +6,8 @@ from imageio import imsave
 import torch
 from torchvision import transforms
 
-from .base_trainer import BaseTrainer
-from ..utils import calc_psnr_and_ssim
+from common.trainer.base_trainer import BaseTrainer
+from common.utils import calc_psnr_and_ssim
 
 
 class SISR_Trainer(BaseTrainer):

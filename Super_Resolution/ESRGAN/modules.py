@@ -43,7 +43,7 @@ class DenseBlock(nn.Module):
         else ConvBlock(in_channels + i*growth_channels, in_channels) for i in range(5)])
         
     def forward(self, x):
-         _x = x
+        _x = x
         for conv_block in self.conv_blocks[:-1]:
             out = conv_block(x)
             x = torch.cat((x, out), dim=1)
